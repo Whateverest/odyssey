@@ -76,7 +76,7 @@ public class PodcastsViewModel extends GenericViewModel<TrackModel> {
         }
     }
 
-    public static class PodcastsViewModelFactory extends ViewModelProvider.NewInstanceFactory {
+    public static class PodcastsViewModelFactory implements ViewModelProvider.Factory {
 
         private final Application mApplication;
 

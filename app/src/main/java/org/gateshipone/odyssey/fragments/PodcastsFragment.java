@@ -80,12 +80,12 @@ public class PodcastsFragment extends OdysseyFragment<TrackModel> implements Ada
         // get swipe layout
         mSwipeRefreshLayout = view.findViewById(R.id.refresh_layout);
         // set swipe colors
-        mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
-                ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
+        mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(requireContext(), R.attr.colorAccent),
+                ThemeUtils.getThemeColor(requireContext(), R.attr.colorPrimary));
         // set swipe refresh listener
         mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
-        mAdapter = new PodcastsAdapter(getActivity());
+        mAdapter = new PodcastsAdapter(requireActivity());
 
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
@@ -101,8 +101,8 @@ public class PodcastsFragment extends OdysseyFragment<TrackModel> implements Ada
         // activate options menu in toolbar
         setHasOptionsMenu(true);
 
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        mClickAction = PreferenceHelper.getClickAction(sharedPreferences, getContext());
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        mClickAction = PreferenceHelper.getClickAction(sharedPreferences, requireContext());
 
         // try to resume the saved search string
         if (savedInstanceState != null) {
@@ -155,7 +155,7 @@ public class PodcastsFragment extends OdysseyFragment<TrackModel> implements Ada
     @Override
     public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getActivity().getMenuInflater();
+        MenuInflater inflater = requireActivity().getMenuInflater();
         inflater.inflate(R.menu.context_menu_podcasts_fragment, menu);
     }
 
@@ -189,7 +189,7 @@ public class PodcastsFragment extends OdysseyFragment<TrackModel> implements Ada
         menuInflater.inflate(R.menu.options_menu_podcasts_fragment, menu);
 
         // get tint color
-        int tintColor = ThemeUtils.getThemeColor(getContext(), R.attr.odyssey_color_text_accent);
+        int tintColor = ThemeUtils.getThemeColor(requireContext(), R.attr.odyssey_color_text_accent);
 
         Drawable drawable = menu.findItem(R.id.action_search).getIcon();
         drawable = DrawableCompat.wrap(drawable);
@@ -218,7 +218,7 @@ public class PodcastsFragment extends OdysseyFragment<TrackModel> implements Ada
         final TrackModel podcast = mAdapter.getItem(position);
 
         try {
-            ((GenericActivity) getActivity()).getPlaybackService().playTrack(podcast, clearPlaylist);
+            ((GenericActivity) requireActivity()).getPlaybackService().playTrack(podcast, clearPlaylist);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -228,7 +228,7 @@ public class PodcastsFragment extends OdysseyFragment<TrackModel> implements Ada
         final TrackModel track = mAdapter.getItem(position);
 
         try {
-            ((GenericActivity) getActivity()).getPlaybackService().enqueueTrack(track, asNext);
+            ((GenericActivity) requireActivity()).getPlaybackService().enqueueTrack(track, asNext);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
