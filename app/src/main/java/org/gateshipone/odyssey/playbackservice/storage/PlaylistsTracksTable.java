@@ -83,7 +83,15 @@ public class PlaylistsTracksTable {
      */
     public static final String COLUMN_PLAYLIST_ID = "playlist_id";
 
+    /**
+     * Name of the column that holds the position of the track in the playlist
+     */
     public static final String COLUMN_PLAYLIST_POSITION = "playlist_position";
+
+    /**
+     * Name of the column that holds the flag if the track is a podcast
+     */
+    public static final String COLUMN_IS_PODCAST = "is_podcast";
 
     /**
      * Database creation SQL statement
@@ -100,7 +108,8 @@ public class PlaylistsTracksTable {
             COLUMN_TRACK_URL + " text," +
             COLUMN_TRACK_ID + " integer," +
             COLUMN_PLAYLIST_ID + " integer," +
-            COLUMN_PLAYLIST_POSITION + " integer" +
+            COLUMN_PLAYLIST_POSITION + " integer," +
+            COLUMN_IS_PODCAST + " integer" +
             ");";
 
     private static final String DATABASE_DROP = "DROP TABLE if exists " + TABLE_NAME;

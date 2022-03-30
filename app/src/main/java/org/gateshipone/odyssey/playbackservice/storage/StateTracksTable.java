@@ -87,6 +87,11 @@ public class StateTracksTable {
     public static final String COLUMN_BOOKMARK_TIMESTAMP = "bookmark_timestamp";
 
     /**
+     * Name of the column that holds the flag if the track is a podcast
+     */
+    public static final String COLUMN_IS_PODCAST = "is_podcast";
+
+    /**
      * Database creation SQL statement
      */
     private static final String DATABASE_CREATE = "create table if not exists " + TABLE_NAME + "(" +
@@ -100,7 +105,8 @@ public class StateTracksTable {
             COLUMN_TRACK_ARTIST_ID + " integer," +
             COLUMN_TRACK_URL + " text," +
             COLUMN_TRACK_ID + " integer," +
-            COLUMN_BOOKMARK_TIMESTAMP + " integer " +
+            COLUMN_BOOKMARK_TIMESTAMP + " integer," +
+            COLUMN_IS_PODCAST + " integer" +
             ");";
 
     private static final String DATABASE_DROP = "DROP TABLE if exists " + TABLE_NAME;

@@ -159,7 +159,7 @@ public class TrackModel implements GenericModel, Parcelable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             mIsPodcast = in.readBoolean();
         } else {
-            mIsPodcast = (in.readByte() != 0);
+            mIsPodcast = in.readByte() != 0;
         }
     }
 
@@ -347,7 +347,7 @@ public class TrackModel implements GenericModel, Parcelable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             dest.writeBoolean(mIsPodcast);
         } else {
-            dest.writeInt(mIsPodcast ? 1 : 0);
+            dest.writeByte((byte) (mIsPodcast ? 1 : 0));
         }
     }
 

@@ -161,7 +161,7 @@ OdysseyWidgetProvider extends AppWidgetProvider {
             case PAUSE: {
                 if (!mHideArtwork) {
                     // Check if the tracks album changed
-                    if (mLastInfo.getCurrentTrack().getTrackAlbumId() != item.getTrackAlbumId()) {
+                    if (mLastInfo.getCurrentTrack().getTrackAlbumId() != item.getTrackAlbumId() || mLastInfo.getCurrentTrack().isPodcast()) {
                         // Album changed, it is necessary to start the image loader
                         views.setImageViewResource(R.id.widget_covert_artwork, R.drawable.odyssey_notification);
 

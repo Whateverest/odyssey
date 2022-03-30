@@ -434,7 +434,7 @@ public class PlaybackServiceStatusHelper {
      * @param albumId Id to identify and compare the artwork with the current track
      */
     public void newAlbumArtworkReady(long albumId) {
-        if (mLastTrack != null && (albumId == mLastTrack.getTrackAlbumId()) && !mHideArtwork) {
+        if (mLastTrack != null && albumId == mLastTrack.getTrackAlbumId() && !mHideArtwork) {
             // Start cover loader
             startCoverImageTask();
         }

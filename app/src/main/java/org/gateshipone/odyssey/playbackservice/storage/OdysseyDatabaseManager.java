@@ -51,7 +51,7 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
     /**
      * The version of the database
      */
-    private static final int DATABASE_VERSION = 23;
+    private static final int DATABASE_VERSION = 24;
 
     private static OdysseyDatabaseManager mInstance;
 
@@ -67,7 +67,8 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
             StateTracksTable.COLUMN_TRACK_ARTIST,
             StateTracksTable.COLUMN_TRACK_ARTIST_ID,
             StateTracksTable.COLUMN_TRACK_URL,
-            StateTracksTable.COLUMN_TRACK_ID
+            StateTracksTable.COLUMN_TRACK_ID,
+            StateTracksTable.COLUMN_IS_PODCAST
     };
 
     /**
@@ -104,7 +105,8 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
             PlaylistsTracksTable.COLUMN_TRACK_ARTIST_ID,
             PlaylistsTracksTable.COLUMN_TRACK_URL,
             PlaylistsTracksTable.COLUMN_TRACK_ID,
-            PlaylistsTracksTable.COLUMN_PLAYLIST_ID
+            PlaylistsTracksTable.COLUMN_PLAYLIST_ID,
+            PlaylistsTracksTable.COLUMN_IS_PODCAST
     };
 
     private OdysseyDatabaseManager(final Context context) {
@@ -140,6 +142,7 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
             PlaylistsTracksTable.createTable(db);
             PlaylistsTable.createTable(db);
         }
+
         // new scheme for all tables introduced with version 23
         // albumKey was removed and replaced by albumId
         // artistId was introduced
@@ -154,6 +157,11 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
             StateTable.createTable(db);
             PlaylistsTracksTable.createTable(db);
             PlaylistsTable.createTable(db);
+        }
+
+        if (oldVersion < 24) {
+            db.execSQL("ALTER TABLE " + StateTracksTable.TABLE_NAME + " ADD COLUMN " + StateTracksTable.COLUMN_IS_PODCAST + " integer default 0");
+            db.execSQL("ALTER TABLE " + PlaylistsTracksTable.TABLE_NAME + " ADD COLUMN " + PlaylistsTracksTable.COLUMN_IS_PODCAST + " integer default 0");
         }
     }
 
@@ -260,6 +268,7 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
             values.put(StateTracksTable.COLUMN_TRACK_ARTIST_ID, item.getTrackArtistId());
             values.put(StateTracksTable.COLUMN_TRACK_ID, item.getTrackId());
             values.put(StateTracksTable.COLUMN_BOOKMARK_TIMESTAMP, stateTimeStamp);
+            values.put(StateTracksTable.COLUMN_IS_PODCAST, item.isPodcast() ? 1 : 0);
 
             odysseyDB.insert(StateTracksTable.TABLE_NAME, null, values);
         }
@@ -318,8 +327,9 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
                 final long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(StateTracksTable.COLUMN_TRACK_ALBUM_ID));
                 final long artistId = cursor.getLong(cursor.getColumnIndexOrThrow(StateTracksTable.COLUMN_TRACK_ARTIST_ID));
                 final long id = cursor.getLong(cursor.getColumnIndexOrThrow(StateTracksTable.COLUMN_TRACK_ID));
+                final boolean isPodcast = cursor.getInt(cursor.getColumnIndexOrThrow(StateTracksTable.COLUMN_IS_PODCAST)) == 1;
 
-                TrackModel item = new TrackModel(trackName, artistName, artistId, albumName, albumId, duration, number, Uri.parse(url), id);
+                TrackModel item = new TrackModel(trackName, artistName, artistId, albumName, albumId, duration, number, Uri.parse(url), id, -1, isPodcast);
 
                 playList.add(item);
 
@@ -347,13 +357,8 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
         // query the most recent timestamp
         final Cursor stateCursor = odysseyDB.query(
                 StateTable.TABLE_NAME,
-                new String[]{StateTable.COLUMN_BOOKMARK_TIMESTAMP},
-                "",
-                null,
-                "",
-                "",
-                StateTable.COLUMN_BOOKMARK_TIMESTAMP + " DESC",
-                "1");
+                new String[]{StateTable.COLUMN_BOOKMARK_TIMESTAMP}, "", null, "", "",
+                StateTable.COLUMN_BOOKMARK_TIMESTAMP + " DESC", "1");
 
         if (stateCursor.moveToFirst()) {
             final long timeStamp = stateCursor.getLong(stateCursor.getColumnIndexOrThrow(StateTable.COLUMN_BOOKMARK_TIMESTAMP));
@@ -379,8 +384,9 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
                     final long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(StateTracksTable.COLUMN_TRACK_ALBUM_ID));
                     final long artistId = cursor.getLong(cursor.getColumnIndexOrThrow(StateTracksTable.COLUMN_TRACK_ARTIST_ID));
                     final long id = cursor.getLong(cursor.getColumnIndexOrThrow(StateTracksTable.COLUMN_TRACK_ID));
+                    final boolean isPodcast = cursor.getInt(cursor.getColumnIndexOrThrow(StateTracksTable.COLUMN_IS_PODCAST)) == 1;
 
-                    TrackModel item = new TrackModel(trackName, artistName, artistId, albumName, albumId, duration, number, Uri.parse(url), id);
+                    TrackModel item = new TrackModel(trackName, artistName, artistId, albumName, albumId, duration, number, Uri.parse(url), id, -1, isPodcast);
 
                     playList.add(item);
 
@@ -607,6 +613,7 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
                 values.put(PlaylistsTracksTable.COLUMN_TRACK_ID, track.getTrackId());
                 values.put(PlaylistsTracksTable.COLUMN_PLAYLIST_ID, playlistId);
                 values.put(PlaylistsTracksTable.COLUMN_PLAYLIST_POSITION, index);
+                values.put(PlaylistsTracksTable.COLUMN_IS_PODCAST, track.isPodcast() ? 1 : 0);
 
                 odysseyDB.insert(PlaylistsTracksTable.TABLE_NAME, null, values);
 
@@ -718,7 +725,7 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
     /**
      * Method to remove a track from an already existing playlist
      *
-     * @param playlistId The id of the playlist
+     * @param playlistId    The id of the playlist
      * @param trackPosition The position in the playlist of the track that should be removed
      * @return true if a track was removed, false otherwise
      */
@@ -776,7 +783,7 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
      * Private method to return all tracks of the playlist for the given id
      *
      * @param playlistId The id of the playlist
-     * @param database A reference to the already opened @{@link SQLiteDatabase} instance
+     * @param database   A reference to the already opened @{@link SQLiteDatabase} instance
      * @return A list of @{@link TrackModel} for all tracks of the playlist
      */
     private List<TrackModel> getTracksForPlaylist(final long playlistId, final SQLiteDatabase database) {
@@ -803,8 +810,9 @@ public class OdysseyDatabaseManager extends SQLiteOpenHelper {
                 final long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(PlaylistsTracksTable.COLUMN_TRACK_ALBUM_ID));
                 final long artistId = cursor.getLong(cursor.getColumnIndexOrThrow(PlaylistsTracksTable.COLUMN_TRACK_ARTIST_ID));
                 final long id = cursor.getLong(cursor.getColumnIndexOrThrow(PlaylistsTracksTable.COLUMN_TRACK_ID));
+                final boolean isPodcast = cursor.getInt(cursor.getColumnIndexOrThrow(PlaylistsTracksTable.COLUMN_IS_PODCAST)) == 1;
 
-                TrackModel item = new TrackModel(trackName, artistName, artistId, albumName, albumId, duration, number, Uri.parse(url), id);
+                TrackModel item = new TrackModel(trackName, artistName, artistId, albumName, albumId, duration, number, Uri.parse(url), id, -1, isPodcast);
 
                 tracks.add(item);
             } while (cursor.moveToNext());
