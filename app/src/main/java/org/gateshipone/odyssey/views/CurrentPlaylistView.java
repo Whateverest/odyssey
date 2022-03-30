@@ -224,6 +224,19 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
         return "";
     }
 
+    /**
+     * Return true if the selected track is a podcast else false.
+     *
+     * @param position The position of the track in the playlist.
+     */
+    public boolean isPodcast(int position) {
+        if (mCurrentPlaylistAdapter != null) {
+            TrackModel clickedTrack = (TrackModel) mCurrentPlaylistAdapter.getItem(position);
+            return clickedTrack.isPodcast();
+        }
+        return false;
+    }
+
     public void hideArtwork(boolean enable) {
         mHideArtwork = enable;
         if (mCurrentPlaylistAdapter != null) {

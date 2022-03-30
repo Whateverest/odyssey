@@ -474,7 +474,8 @@ public class OdysseyMainActivity extends GenericActivity
             menu.findItem(R.id.view_current_playlist_action_showartist).setVisible(artistId != -1);
 
             // check the view type
-            if (currentPlaylistView.getItemViewType(info.position) == CurrentPlaylistAdapter.VIEW_TYPES.TYPE_SECTION_TRACK_ITEM) {
+            boolean isPodcast = currentPlaylistView.isPodcast(info.position);
+            if (currentPlaylistView.getItemViewType(info.position) == CurrentPlaylistAdapter.VIEW_TYPES.TYPE_SECTION_TRACK_ITEM && !isPodcast) {
                 menu.findItem(R.id.view_current_playlist_action_remove_section).setVisible(true);
             }
         }
